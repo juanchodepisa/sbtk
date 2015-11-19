@@ -22,7 +22,7 @@ class UserInterface(object):
     def __init__(self, boss):
         self.__manager = boss
         try:
-            with open("console_ui/intro.txt", encoding="utf-8") as f:
+            with open("user_interfaces\console_ui\intro.txt", encoding="utf-8") as f:
                 self.intro_string= f.read()
         except Exception:
             self.intro_string = simplest_window(
