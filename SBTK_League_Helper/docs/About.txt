@@ -1,0 +1,11 @@
+About the program:
+This first "release" maily focuses on the automatization of League tournaments using the built-in tools available on the Online Go Server (https://online-go.com).
+
+Why SBtk?:
+SBtk can mean whatever you want it to mean. For example, for me it means "Sunjang Baduk tool kit", but it was also meant as a joke, which I will leave to your imagination: feel free to find your own acronyms, and you might even convince me. Will it continue to be SBtk later on? that remains to be seen.
+
+Creator (or Who is this "me" you talked about before?):
+Juan A. Vargas
+a.k.a Leira on OGS
+
+DISCLAIMER: This is amateur code, support is limited to whim.
