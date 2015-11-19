@@ -108,7 +108,7 @@ class ServerElement (dict):
     # Methods to be checked
     __delitem__, __setitem__, clear pop, popitem, update = (__consistency_checker_decorator(x) for x in (dict.__delitem__,
                                                                                                         dict.__setitem__,
-                                                                                                        dict.clear pop,
+                                                                                                        dict.clear, dict.pop,
                                                                                                         dict.popitem,
                                                                                                         dict.update))
     
