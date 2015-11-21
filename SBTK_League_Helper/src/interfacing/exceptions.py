@@ -14,7 +14,7 @@ class TypeUnsupportedError (Exception):
         return repr(self.description)
 
 class FileTypeUnsupportedError (TypeUnsupportedError):
-    def __init__(self, filename, operation, type="") # operation: 'read', 'write', etc.
+    def __init__(self, filename, operation, type=""): # operation: 'read', 'write', etc.
         self.value = filename
         if type:
             self.type = type

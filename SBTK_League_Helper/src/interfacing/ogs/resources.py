@@ -287,6 +287,7 @@ resources.add(['players'],
     title = "Players List",
     description = "List of all {{context}} accounts.",
     methods = [GET])
+resources.add_shortcut(['player'],['players'])
     
 resources.add(['players', ID],
     default = '{{api_server}}/{{api_version}}/players/{0}/',
@@ -333,7 +334,6 @@ resources.add(['players', ID, 'tournaments'],
     title = "Player Tournaments",
     description = "View the list of tournaments a player has participated in.",
     methods = [GET])
-    
 
 """
 OPEN CHALLENGES

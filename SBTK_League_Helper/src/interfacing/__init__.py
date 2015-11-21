@@ -1,5 +1,5 @@
-import src.tools.markers
+from src.tools.markers import AdHocMarker
 
 supported_servers = {
-    "OGS": markers.AdHocMarker("OGS": "Go Server")
-    "OGS_Beta": markers.AdHocMarker("OGS_Beta": "Beta Go Server")}
+    "OGS": AdHocMarker("OGS", "Go Server"),
+    "OGS_Beta": AdHocMarker("OGS_Beta", "Beta Go Server")}

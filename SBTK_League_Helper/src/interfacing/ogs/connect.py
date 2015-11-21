@@ -1,4 +1,4 @@
-from urllib import parse, request
+from urllib import parse, request, error
 import json
 
 from src import log_entry, application_user_agent
@@ -19,16 +19,20 @@ def parse_form_parameters(parameters, content_type="application/x-www-form-urlen
 
 def _urlopen(req):
     ref = log_entry ("Sending %s request to %s...." % (req.get_method(), req._full_url))
-    raw_resp = request.urlopen(req)
-    log_entry (ref, "HTTP Status: {0} ({1})".format(raw_resp.status, raw_resp.reason))
+    try:
+        raw_resp = request.urlopen(req)
+        log_entry (ref, "HTTP Status: {0} ({1})".format(raw_resp.status, raw_resp.reason))
+    except error.HTTPError as e:
+        log_entry (ref, "HTTP Status: {0} ({1})".format(e.code, e.reason))
+        raise e from None
     return raw_resp
  
 def interpret_response(raw_response):
-    content_type = raw_response.getheader("Content-Type"): # This seems sufficient, if it is case insensitive
+    content_type = raw_response.getheader("Content-Type") # This seems sufficient, if it is case insensitive
     if content_type == "application/json":
-        json.loads(raw_response.read().decode(encoding))
+        return json.loads(raw_response.read().decode(encoding))
     else:
-        raise TypeUnarseError(content_type)
+        raise TypeUnparseError(content_type)
    
    
 uninterpreted_response = lambda req: request.urlopen(req).read().decode(encoding)
@@ -41,7 +45,7 @@ class Authentication():
         self.context_str = get_context_str("context", mode=self.__mode_str())
         self.context_short_str = get_context_str("context_short", mode=self.__mode_str())
         self.access_point = full_resource_url('access token', mode=self.__mode_str())
-        self.param, location = retrieve_keys(user, password, context=self.context_short_str, return_location=True,)
+        self.param, self.location = retrieve_keys(user, password, context=self.context_short_str, return_location=True,)
         
         check_param = ["client_id", "client_secret", "password"]
         if not all(key in self.param for key in check_param) or len(self.param)!=len(check_param):
@@ -92,7 +96,7 @@ class Authentication():
         if qp:
             url += "?" + qp
         
-        req = request.Request(url, headers = dict(headers, **self.default_headers)
+        req = request.Request(url, headers = dict(headers, **self.default_headers))
         raw_resp = _urlopen(req)
         response = interpret_response(raw_resp)
         
@@ -123,7 +127,7 @@ class Authentication():
     def __ppd_request(self, resource, app_param, headers={}, method='', content_type = "application/json"): # POST/PUT/DELETE
         url = full_resource_url(*resource, mode=self.__mode_str())
         headers = dict({"Content-Type": content_type},**dict(headers, **self.default_headers))
-        data = parse_form_parameters(app_param, content_type=headers["Content-Type"], method)
+        data = parse_form_parameters(app_param, content_type=headers["Content-Type"], method=method)
         
         req = request.Request(url, data=data, headers=headers)
         if method:

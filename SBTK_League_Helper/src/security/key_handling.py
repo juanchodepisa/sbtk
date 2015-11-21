@@ -7,7 +7,7 @@ from .obfuscation import transform
 from .exceptions import KeysDirectoryNotFound, KeysFileNotFound
 
 
-user_index = os.path.join(__file__, "keys_loc.json")
+user_index = os.path.join(os.path.dirname(__file__), "keys_loc.json")
 default_context = "OGS"
 obfuscated = "_obfuscated_"
 plaintext = "_plaintext_"
@@ -20,13 +20,12 @@ def reset_index():
 
 if not os.path.isfile(user_index):
     log_entry (user_index, "file does not exist.")
-    ref = log_entry ("Creating file %s...." % user_index)
+    __ref = log_entry ("Creating file %s...." % user_index)
     reset_index()
-    log_entry(ref, "File created. Ready!")
-    del ref
+    log_entry(__ref, "File created. Ready!")
+    del __ref
 else:
     log_entry (user_index, "file exists. Ready!")
-    del ref
 
 
 def get_keys_directory(user, on_fail = no_directory_default):
