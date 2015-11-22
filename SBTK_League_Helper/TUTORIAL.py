@@ -192,19 +192,19 @@ try:
     You're lucky today, I found a piece of ASCII cake laying around, so you may have it :D
     
     """, skip = True)
-    print(r"""
-                 _.-.
-               .' _  \
-             ,'  (_)  \_
-         _.-|`-._      \""--._
-       .' .-(=._ `-._   \""-. `.
-      /  /  |   `=.  `-._\   \  \
-     |  |    `-._  `=._  | .  |  |
-      \  \  ;' .,`--._ `=| ' /  /
-       `._``--..._____`--'-''_.'
-    hjw   `--.._________..--'
+    FOO.title(r"""
+            _.-.             
+          .' _  \            
+        ,'  (_)  \_          
+    _.-|`-._      \""--._    
+  .' .-(=._ `-._   \""-. `.  
+ /  /  |   `=.  `-._\   \  \ 
+|  |    `-._  `=._  | .  |  |
+ \  \  ;' .,`--._ `=| ' /  / 
+  `._``--..._____`--'-''_.'  
+hjw  `--.._________..--'     
 
-    """)
+    """, skip = True)
     FOO.text("""
     ... :/ uhmmmm, I know, it's not much, shall we continue? ...
     """)
@@ -239,7 +239,7 @@ try:
             Password: """)
             if not FOO.ANNOYANCE and my_password:
                 FOO.text("""
-                Oops, sorry! That was plain-text. Don't worry, this is no error, it's just that
+                Oops, sorry! That was plain-text. Don't worry, this is no error, it's just that \
                 I can't help it, because there's no cross-platform Python \
                 function that I know of which has predictable 'asterisk' behavior.""",
                 """
@@ -481,7 +481,7 @@ try:
             
             but bear in mind you would need to create an account there, and require a different set of keys.
             We will not be doing that today, because we are too cool for the Beta Server.
-            """, end = "")
+            """.format(username = repr(username)), end = "")
             FOO.flow_continue()
             
         except HTTPError as e:
@@ -518,97 +518,140 @@ try:
         
     if FOO.flow_continue():
         FOO.yn_question("Do you want to see the examples?")
-    
+        
+    FOO.ANNOYANCE = 0
     FOO.ANNOYANCE2 = False
     while FOO.flow_control_is(True):
         try:
-            FOO.text("""
-            All API requests are sent to specific addresses within the API Server. I suggest you take a good \
-            read at http://docs.ogs.apiary.io/ to get the basic idea of the functionalities.""","""\
-            You can also check the contents of src/interfacing/ogs/resources.py, which contains a more exhaustive \
-            list than what appears in OGS documentation.
-            """,
-            """
-            OK, first a fool's proof example (just GET from address):
-            
-            >> id_card.get(['user'])
-            
-            to retrieve your user information. This comes in json format, which our daemons will \
-            easily take care of, and transform into Python built-ins.
-            """,end = "")
-            
-            result = id_card.get(['user'])
-            my_id = result['id']
-            
-            FOO.builtin(result)
-            FOO.text("""\
-            Another way to get information about yourself is using your id number:
-            
-            >> id_card.get(['player', {id}])
-            
-            Here the id could be any other number, our custom dictionary takes care of that.
-            """.format(id = my_id),end = "")
-            
-            result = id_card.get(['player', my_id])
-            
-            FOO.builtin(result)
-            if result['supporter'] and not FOO.ANNOYANCE2:
-                FOO.text("Site supporter, huh? Good on you ;)")
-                FOO.ANNOYANCE2 = True
+            if FOO.ANNOYANCE == 0:
+                FOO.text("""
+                All API requests are sent to specific addresses within the API Server. I suggest you take a good \
+                read at http://docs.ogs.apiary.io/ to get the basic idea of the functionalities.""","""\
+                You can also check the contents of src/interfacing/ogs/resources.py, which contains a more exhaustive \
+                list than what appears in OGS documentation.
+                """,
+                """
+                OK, first a fool's proof example (just GET from address):
                 
-            my_country = result["country"]
+                >> id_card.get(['user'])
+                
+                to retrieve your user information. This comes in json format, which our daemons will \
+                easily take care of, and transform into Python built-ins.
+                """,end = "")
+                FOO.ANNOYANCE += 1
+            elif FOO.ANNOYANCE == 1:
+                FOO.text("""
+                >> id_card.get(['user'])""")
+                
+            if FOO.ANNOYANCE == 1: 
+                result = id_card.get(['user'])
+                my_id = result['id']
+                
+                FOO.builtin(result)
+                FOO.text("""\
+                Another way to get information about yourself is using your id number:
+                
+                >> id_card.get(['player', {id}])
+                
+                Here the id could be any other number, our custom dictionary takes care of that.
+                """.format(id = my_id),end = "")
+                FOO.ANNOYANCE+=1
+            elif FOO.ANNOYANCE == 2:
+                FOO.text("""
+                >> id_card.get(['player', {id}])""".format(id = my_id))
+                
+            if FOO.ANNOYANCE == 2: 
+                result = id_card.get(['player', my_id])
+                
+                FOO.builtin(result)
+                if result['supporter'] and not FOO.ANNOYANCE2:
+                    FOO.text("Site supporter, huh? Good on you ;)")
+                    FOO.ANNOYANCE2 = True
+                    
+                my_country = result["country"]
+                
+                FOO.text("""\
+                Now on to a more complicated example. \
+                GET requests may take query parameters to retrieve a more specific resource:
+                
+                >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating'}})
+                
+                This will show you a list of the strongest players registered for your country.
+                """.format(country = my_country),end = "")
+                FOO.ANNOYANCE+=1
+            elif FOO.ANNOYANCE == 3:
+                FOO.text("""
+                >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating'}})\
+                """.format(country = my_country))
             
-            FOO.text("""\
-            Now on to a more complicated example. \
-            GET requests may take query parameters to retrieve a more specific resource:
+            if FOO.ANNOYANCE == 3:
+                result = id_card.get(['players'], {'country': my_country, 'ordering': '-rating'})
+                
+                FOO.builtin(result)
+                
+                FOO.text("""
+                Most generic GET requests are possible even without authentication. This is because \
+                they are not supposed to change the state of the server.""",
+                """\
+                Conversely, POST, PUT and DELETE requests (almost) always will require it. So we'll try \
+                something harmless.
+                You are going to send a message to yourself.""")
+                
+                message = FOO.question("Please type in a message: ")
+                
+                
+                FOO.text("""
+                POST requests have application parameters instead of query parameters, which are sent \
+                within the message rather than the url. In our case we do it like this
+                
+                >> id_card.post(['user', 'mail'], 
+                .............>> app_param = {{'recipients':[{username}],
+                ..........................>> 'subject':'Auto message',
+                ..........................>> 'body':"..."}})\
+                """.format(username = repr(username)), end = "")
+                FOO.ANNOYANCE+=1
+            elif FOO.ANNOYANCE == 4:
+                FOO.text("""
+                >> id_card.post(['user', 'mail'], 
+                .............>> app_param = {{'recipients':[{username}],
+                ..........................>> 'subject':'Auto message',
+                ..........................>> 'body':"..."}})\
+                """.format(username = repr(username)))
             
-            >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating'}})
-            
-            This will show you a list of the strongest players registered for your country.
-            """.format(country = my_country),end = "")
-            
-            result = id_card.get(['players'], {'country': my_country, 'ordering': '-rating'})
-            
-            FOO.builtin(result)
-            
-            FOO.text("""
-            Most generic GET requests are possible even without authentication. This is because \
-            they are not supposed to change the state of the server.""",
-            """\
-            Conversely, POST, PUT and DELETE requests (almost) always will require it. So we'll try \
-            something harmless.
-            You are going to send a message to yourself.""")
-            
-            message = FOO.question("Please type in a message: ")
-            
-            
-            FOO.text("""
-            POST requests have application parameters instead of query parameters, which are sent
-            within the message rather than the url. In our case we do it like this
-            
-            >> id_card.post(['user', 'mail'], 
-            .............>> app_param = {{'recipients':[{username}],
-            ..........................>> 'subject':'Auto message',
-            ..........................>> 'body':"..."}})\
-            """.format(username = repr(username)), end = "")
-            
-            id_card.post(['user', 'mail'], 
-                         app_param = {'recipients': [username],
-                                      'subject'   : 'Auto message',
-                                      'body'      : FOO.arrange_automail(username, message)})
-            
-            
-            FOO.text("""
-            Done! Please check your OGS mail.""",
-            """
-            So, I hope this helped explain a bit how the whole system works."""
-            """I'll have more examples for you in the future.""", end = "")
+            if FOO.ANNOYANCE == 4:
+                id_card.post(['user', 'mail'], 
+                             app_param = {'recipients': [username],
+                                          'subject'   : 'Auto message',
+                                          'body'      : FOO.arrange_automail(username, message)})
+                
+                
+                FOO.text("""
+                Done! Please check your OGS mail.""",
+                """
+                So, I hope this helped explain a bit how the whole system works."""
+                """I'll have more examples for you in the future.""", end = "")
         
-        except (HTTPError, URLError) as e:
+        except HTTPError as e:
+            FOO.text("""
+            Hmmmmm, your request was met with an error:
+            ERROR {error.code}: {error.reason}
+            
+            This is odd because it normally works. I'll refresh your credentials.""".format(error = e))
+            try:
+                id_card.refresh_auth()
+                FOO.text("""Well, it seems that worked""", end = "")
+            except (HTTPError, URLError):
+                FOO.text("""No luck, it must be something else.""", end = "")
+            FOO.yn_question("Do you want to try again?")
+        except URLError as e:
             FOO.text("""
             Oh snap! The internet just tricked us buddy!
-            Please check your connection and try again later.""")
-        
+            
+            I received this error:
+            {error}
+            
+            Please check your connection.""".format(error = e))
+            FOO.yn_question("Do you want to try again?")
     
 
     ####################################################################################################################
@@ -643,9 +686,30 @@ try:
     """,
     skip = True)
 
+except KeyboardInterrupt:
+    FOO.separator()
+    
+    FOO.title(r"""
+#######################################################
+##   __    _   ____   _____   ______    __  __  __   ##
+##  |  \  | | /    \ |  __ \ |  ____|  |  ||  ||  |  ##
+##  |   \ | ||  /\  || |__) )| |___    |  ||  ||  |  ##
+##  | |\ \| || |  | ||  ___/ |  ___|    \/  \/  \/   ##
+##  | | \   ||  \/  || |     | |____    __  __  __   ##
+##  |_|  \__| \____/ |_|     |______|  |__||__||__|  ##
+##                                                   ##
+##     KEYBOARD INTERRUPT IS THE DIGITAL VERSION     ##
+##             OF A PUNCH TO THE FACE                ##
+##                                                   ##
+#######################################################
+    """, skip = True)
+    FOO.text("\n\n So you're leaving already?\n Well have a nice day :)\n", skip = True)
+    
+    
+
 except Exception as e:
+    FOO.separator()
     FOO.text("""
-    **********************************************
 
     Aghck! I've got an uncaught Exception X(
 

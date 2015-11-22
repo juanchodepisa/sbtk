@@ -43,9 +43,15 @@ else:
     from pprint import PrettyPrinter
     from src.tools.strings import make_printable
     
-    def title (string):
-        print ("{0:^{1}}".format(string, fixwidth))
-        return input_halt()
+    def title (string, skip = False):
+        lines = string.splitlines()
+        for line in lines:
+            print ("{0:^{1}}".format(line, fixwidth))
+        if skip:
+            result = None
+        else: 
+            result = input_halt()
+        return result
         
     def text (*strings, end = "\n", skip = False):
         for string in strings:
@@ -61,6 +67,10 @@ else:
             else:
                 result = input_skip()
         return result
+    
+    def separator():
+        print()
+        print ('*'*fixwidth)
         
     PRINTER = PrettyPrinter()
     def builtin(obj):
@@ -158,7 +168,7 @@ else:
 
 
     ##############################################################
-    from sys import exit, argv, stdout
+    from sys import exit, argv, stdout, stdin
     from time import sleep
     
     SYSARGS = argv[1:]
@@ -189,13 +199,8 @@ else:
     def safe_input():
         global SYSARGS
         if len(SYSARGS) == 0:
-            try:
-                return input()
-            except KeyboardInterrupt:
-                global SKIP
-                SKIP = True
-                text("\n\n So you're leaving already?\n Well have a nice day :)\n")
-                exit()
+            stdin.flush()
+            return input()
         else:
             string = SYSARGS.pop(0)
             stdout.flush()
