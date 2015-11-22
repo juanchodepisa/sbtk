@@ -136,14 +136,14 @@ class Authentication():
         response = interpret_response(raw_resp)
         return response
         
-    def post(self, resource, app_param, headers={}):
-        return self.__ppd_request(resource, app_param, headers={})
+    def post(self, resource, app_param, headers={}, content_type = "application/json"):
+        return self.__ppd_request(resource, app_param, headers={}, content_type = content_type)
 
-    def put(self, resource, app_param, headers={}):
-        return self.__ppd_request(resource, app_param, headers={}, method='PUT')
+    def put(self, resource, app_param, headers={}, content_type = "application/json"):
+        return self.__ppd_request(resource, app_param, headers={}, method='PUT', content_type = content_type)
 
-    def delete(self, resource, app_param={}, headers={}):
-        return self.__ppd_request(resource, app_param, headers={}, method='DELETE')
+    def delete(self, resource, app_param={}, headers={}, content_type = "application/json"):
+        return self.__ppd_request(resource, app_param, headers={}, method='DELETE', content_type = content_type)
         
     def __mode_str(self):
         if self.is_tester:

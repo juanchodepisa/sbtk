@@ -20,6 +20,7 @@ id_card = None
 result = None
 my_id = 0
 my_country = None
+message = ""
 
 try:
 
@@ -34,11 +35,12 @@ try:
     I. FIRST THINGS FIRST:
 
 
-    1- You need to get your own client id and secret, so that you'll be logging in from your own copy of the script. \
+    1- You need to get your own CLIENT ID and CLIENT SECRET, so that you'll be logging in from your own copy of the script. \
     So go here https://online-go.com/developer and create one. Congratulations! you're "officially" a developer.
 
-    2- You need your own client password, also provided by OGS. So here https://online-go.com/user/settings there's \
-    an Application Specific Password: you should create one. You've probably done this much so far.""")
+    2- You need your own client PASSWORD, also provided by OGS. So here https://online-go.com/user/settings there's \
+    an Application Specific Password: you should create one. You've probably done this much so far.""""""\
+    If you havent, go now, and get the three keys, and come back when you're ready. I'll be waiting for you...""")
     FOO.text("""\
     3- Now you'll store your keys.""","""Yeah, you heard it right, store them.""",
     """
@@ -237,7 +239,8 @@ try:
             Password: """)
             if not FOO.ANNOYANCE and my_password:
                 FOO.text("""
-                Oops, sorry! That was plain-text. I can't help it, there's no cross-platform Python \
+                Oops, sorry! That was plain-text. Don't worry, this is no error, it's just that
+                I can't help it, because there's no cross-platform Python \
                 function that I know of which has predictable 'asterisk' behavior.""",
                 """
                 Also, you're the developer, it's up to you to create your desired behavior. I'm \
@@ -321,14 +324,14 @@ try:
         FOO.text("""
         Now I will call
 
-        >> store_keys({username},{...},'***') # <- Your keys and password go here
+        >> store_keys({username},{{...}},'***') # <- Your keys and password go here
         
         This function has other optional fields. Most relevantly context='OGS' is default \
-        behavior, but it can be changed to 'OGS_Beta for testing.'""".format(repr(username)))
+        behavior, but it can be changed to 'OGS_Beta for testing.'""".format(username = repr(username)))
         
         while not FOO.flow_control_is(True):
             try:
-                store_keys(username, keys, password)
+                store_keys(username, keys, my_password)
                 FOO.text("""
                 We've successfully stored your keys. Now you can simply use your username and \
                 password to retrieve them every time.
@@ -393,7 +396,7 @@ try:
             FOO.change_flow(True)
         except KeysFileNotFound as e:
             FOO.text("""
-            Now, I had said you had your keys ready, but now I take it back. There was a KeysDirectoryNotFound exception.
+            Now, I had said you had your keys ready, but now I take it back. There was a KeysFileNotFound exception.
             
             As with other custom exceptions on this package, this one comes with a fancy description: \
             {error_message}
@@ -471,10 +474,15 @@ try:
             -- NOPE! I have my id_card! --
             """,
             """You're damn right! It'll do all that stuff for ya.
+            ""","""
+            You could also try on the Beta Server by calling:
+            
+            >> id_card = Authentication({username},'***', testing = True) # <- Your password goes here
+            
+            but bear in mind you would need to create an account there, and require a different set of keys.
+            We will not be doing that today, because we are too cool for the Beta Server.
             """, end = "")
             FOO.flow_continue()
-            
-            
             
         except HTTPError as e:
             FOO.text("""
@@ -505,22 +513,33 @@ try:
         FOO.text("""
         Alas! Some unknown error occured. Nevermind, let's just continue...
         """)
+        
+        
+        
+    if FOO.flow_continue():
+        FOO.yn_question("Do you want to see the examples?")
     
-    try:
-        if FOO.flow_continue():
-            FOO.text("""\
-            Now, a fool's proof example:
+    FOO.ANNOYANCE2 = False
+    while FOO.flow_control_is(True):
+        try:
+            FOO.text("""
+            All API requests are sent to specific addresses within the API Server. I suggest you take a good \
+            read at http://docs.ogs.apiary.io/ to get the basic idea of the functionalities.""","""\
+            You can also check the contents of src/interfacing/ogs/resources.py, which contains a more exhaustive \
+            list than what appears in OGS documentation.
+            """,
+            """
+            OK, first a fool's proof example (just GET from address):
             
             >> id_card.get(['user'])
             
-            to retrieve your information. This comes in json format, which our daemons will \
+            to retrieve your user information. This comes in json format, which our daemons will \
             easily take care of, and transform into Python built-ins.
             """,end = "")
             
             result = id_card.get(['user'])
             my_id = result['id']
             
-            FOO.text("")
             FOO.builtin(result)
             FOO.text("""\
             Another way to get information about yourself is using your id number:
@@ -532,15 +551,16 @@ try:
             
             result = id_card.get(['player', my_id])
             
-            FOO.text("")
             FOO.builtin(result)
-            if result['supporter']:
+            if result['supporter'] and not FOO.ANNOYANCE2:
                 FOO.text("Site supporter, huh? Good on you ;)")
+                FOO.ANNOYANCE2 = True
                 
             my_country = result["country"]
             
             FOO.text("""\
-            Now on to a more complicated example:
+            Now on to a more complicated example. \
+            GET requests may take query parameters to retrieve a more specific resource:
             
             >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating'}})
             
@@ -550,14 +570,44 @@ try:
             result = id_card.get(['players'], {'country': my_country, 'ordering': '-rating'})
             
             FOO.builtin(result)
+            
             FOO.text("""
+            Most generic GET requests are possible even without authentication. This is because \
+            they are not supposed to change the state of the server.""",
+            """\
+            Conversely, POST, PUT and DELETE requests (almost) always will require it. So we'll try \
+            something harmless.
+            You are going to send a message to yourself.""")
+            
+            message = FOO.question("Please type in a message: ")
+            
+            
+            FOO.text("""
+            POST requests have application parameters instead of query parameters, which are sent
+            within the message rather than the url. In our case we do it like this
+            
+            >> id_card.post(['user', 'mail'], 
+            .............>> app_param = {{'recipients':[{username}],
+            ..........................>> 'subject':'Auto message',
+            ..........................>> 'body':"..."}})\
+            """.format(username = repr(username)), end = "")
+            
+            id_card.post(['user', 'mail'], 
+                         app_param = {'recipients': [username],
+                                      'subject'   : 'Auto message',
+                                      'body'      : FOO.arrange_automail(username, message)})
+            
+            
+            FOO.text("""
+            Done! Please check your OGS mail.""",
+            """
             So, I hope this helped explain a bit how the whole system works."""
             """I'll have more examples for you in the future.""", end = "")
         
-    except (HTTPError, URLError) as e:
-        FOO.text("""
-        Oh snap! The internet just tricked us buddy!
-        Please check your connection and try again later.""")
+        except (HTTPError, URLError) as e:
+            FOO.text("""
+            Oh snap! The internet just tricked us buddy!
+            Please check your connection and try again later.""")
         
     
 
@@ -570,7 +620,13 @@ try:
     """\
     Even more awesome: you can pass strings as arguments from the Terminal, sit back, and watch it \
     as the input autocompletes :O
-    """)
+    """,
+    """\
+    Hint: 
+    
+    python {file} SKIP {username} Y SKIP N SKIP yourpassword SKIP Y SKIP
+    """.format(file = FOO.FILENAME, username = username))
+    
     if not FOO.ANNOYANCE2:
         FOO.text("""\
         Oh! also you can leave 'Password' blank if you would rather store your keys in plain-text. \
@@ -589,12 +645,15 @@ try:
 
 except Exception as e:
     FOO.text("""
+    **********************************************
 
-    Aghck! I've got an Exception X(
+    Aghck! I've got an uncaught Exception X(
 
     That... that didn't feel right... my bits are confused""",
     """
-    The error message looks like this: {}""".format(e),
+    The error looks like this:
+    Error type: {error.__class__.__name__}
+    Arguments: {error.args}""".format(error = e),
     """
     Leira is telling me that he's tired of tries and excepts, \
     even as he keeps writing me, \
