@@ -1,6 +1,6 @@
 from .script_msg_log import log_entry, waiting # Altering the print command to function as a log.
 
-application_user_agent = "STBK League Assistant/Pre-alpha urllib-python3.4 (dev: Leira)"
+application_user_agent = "STBK League Assistant/Pre-alpha https://github.com/juanchodepisa/sbtk"
 
 def class_initializer(Class): # I don't know why there isn't a normal convention for this.
     convention = "__initClass__"

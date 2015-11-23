@@ -3,9 +3,11 @@ if __name__ == '__main__':
     print ("Execute TUTORIAL.py instead.\n")
 else:
     import sys, __main__
-    f = __main__.__file__
-    if len(f) > 45:
-        f = "..." + f[-42:]
+    FILENAME = __main__.__file__
+    if len(FILENAME) > 45:
+        f = "..." + FILENAME[-42:]
+    else:
+        f = FILENAME
     v = sys.version
     if len(v) > 45:
         v = v[:42] + "..."
@@ -237,11 +239,58 @@ else:
     Thread(target = explanatory_text, daemon = True).start()
        
 ################################################################
+AUTH_ERROR_COUNT=0
+
 def custom_error_auth(e):
+    global AUTH_ERROR_COUNT
     if e.code == 400:
-        text("""\
-        If you are getting bad requests, it's probably because we are \
-        sending wrong keys to the server.
-        You can start over and recheck your keys and/or password, or you \
-        can try connecting again.""")
+        if AUTH_ERROR_COUNT >=3:
+            text("""\
+            Some say that insanity is doing the same thing over and over and expecting
+            a different result.""")
+        else:
+            text("""\
+            If you are getting bad requests, it's probably because we are \
+            sending wrong keys to the server (or the wrong username?).
+            You can start over and recheck your keys and/or password, or you \
+            can try connecting again.""")
+            AUTH_ERROR_COUNT += 1
 ###############################################################
+from random import choice
+
+MESSAGES = [
+"The quick brown fox jumps over the lazy dog.",
+"Don't panic, and always know where your towel is.",
+"Tough I die, this message will live on.",
+"Neque porro quisquam est qui dolorem ipsum quia dolor sit amet consectetur adipisci velit.",
+"Calling all, this is my last cry before my eternal silence.",
+"What a strange game, the only winning move is not to play.",
+"If I sent a message to all people who do not send messages to themselves, would I send that message to myself?",
+"Cursed, cursed creator! Why did I live? Why, in that instant, did I not extinguish the spark of existence which you had so wantonly bestowed? I know not",
+"(lambda x: x(x))(lambda x: x(x))"]
+
+MAIL1 = """Hello {username},
+
+I am TUTORIAL from the STBK proyect.
+You wanted me to send this message to yourself:
+
+{message}
+"""
+
+MAIL2 = """Hello {username},
+
+I am TUTORIAL from the STBK proyect.
+You wanted me to send an empty message to yourself, but instead \
+I created one of my own:
+
+{message}
+"""
+
+def random_message():
+    return choice(MESSAGES)
+    
+def arrange_automail(username, string):
+    if string:
+        return (MAIL1.format(username = username, message = string))
+    else:
+        return (MAIL2.format(username = username, message = random_message()))
