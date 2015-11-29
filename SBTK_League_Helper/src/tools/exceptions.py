@@ -1,3 +1,5 @@
+# This need to be sorted out in a smarter way
+
 class InitializationError(Exception):
     def __init__(self, SomeClass, description):
         self.value = SomeClass
@@ -11,14 +13,6 @@ class ReservedValueError(Exception):
         self.value= received
         self.expected = expected
         self.description = description.format(expected, received)
-    
-    def __str__(self):
-        return self.description
-
-class DataCorruptedError(Exception):
-    def __init__(self, obj, description="", **kwargs):
-        self.value= obj
-        self.description = ("Some of the data in %s seems to have be corrupted. "%obj) + description.format(kwargs)
     
     def __str__(self):
         return self.description

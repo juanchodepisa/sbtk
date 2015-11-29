@@ -1,0 +1,11 @@
+ordering = +-field
+field_gte = num (greater or equal than num)
+field_lte = num (lower or equal than num)
+field_gt = num (greater than num)
+field_lt = num (lower than num)
+
+
+hidden fields:
+Player:
+	numProvisional : number of provisional games
+	timeout_provisional : true/false

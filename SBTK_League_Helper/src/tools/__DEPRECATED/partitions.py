@@ -1,3 +1,6 @@
+# DEPRECATION:
+# Class incomplete, no longer necessary
+
 class Partition (dict):
     def __init__(self):
         self.unique_partitions = []

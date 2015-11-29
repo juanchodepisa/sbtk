@@ -1,0 +1,6 @@
+1- Turn the class initializer into a metaclass
+2- Complete the seeders
+3- Rebuild the logger in a more consistent way. changing the current logger would be very easy once this is completed
+
+
+I dare not touch the markeddict class

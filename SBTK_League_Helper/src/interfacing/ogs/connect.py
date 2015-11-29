@@ -1,43 +1,18 @@
-from urllib import parse, request, error
-import json
+from urllib import request
 
 from src import log_entry, application_user_agent
-from src.security.key_handling import retrieve_keys
-from .resources import resources, full_resource_url, get_context_str
-from ..exceptions import ParameterTypeError, TypeParseError, TypeUnparseError
+from src.security import retrieve_keys
+
+from .resources import full_resource_url, get_context_str
+
+from ..exceptions import ParameterTypeError
+from ..http import raw_response
+from ..parsers import parse_application_parameters, parseappend_query_parameters, interpret_response
+
+
 
 encoding='utf-8'
 
-
-def parse_form_parameters(parameters, content_type="application/x-www-form-urlencoded", method = 'POST'):
-    if content_type == "application/x-www-form-urlencoded":
-        return parse.urlencode(parameters).encode(encoding)
-    elif content_type == "application/json":
-        return json.dumps(parameters).encode(encoding)
-    else:
-        raise TypeParseError(content_type, method)
-
-def _urlopen(req):
-    ref = log_entry ("Sending %s request to %s...." % (req.get_method(), req._full_url))
-    try:
-        raw_resp = request.urlopen(req)
-        log_entry (ref, "HTTP Status: {0} ({1})".format(raw_resp.status, raw_resp.reason))
-    except error.HTTPError as e:
-        log_entry (ref, "HTTP Status: {0} ({1})".format(e.code, e.reason))
-        raise e from None
-    return raw_resp
- 
-def interpret_response(raw_response):
-    content_type = raw_response.getheader("Content-Type") # This seems sufficient, if it is case insensitive
-    if content_type == "application/json":
-        return json.loads(raw_response.read().decode(encoding))
-    else:
-        raise TypeUnparseError(content_type)
-   
-   
-uninterpreted_response = lambda req: request.urlopen(req).read().decode(encoding)
-
-    
 
 class Authentication():
     def __init__(self, user, password, testing = False):
@@ -45,7 +20,7 @@ class Authentication():
         self.context_str = get_context_str("context", mode=self.__mode_str())
         self.context_short_str = get_context_str("context_short", mode=self.__mode_str())
         self.access_point = full_resource_url('access token', mode=self.__mode_str())
-        self.param, self.location = retrieve_keys(user, password, context=self.context_short_str, return_location=True,)
+        self.param, location = retrieve_keys(user, password, context=self.context_short_str, return_location=True,)
         
         check_param = ["client_id", "client_secret", "password"]
         if not all(key in self.param for key in check_param) or len(self.param)!=len(check_param):
@@ -61,12 +36,13 @@ class Authentication():
         self.param["grant_type"] = "refresh_token" #these two instructions make sure the fields are hereby updated correctly
         self.param.pop("password")
         
+        
     def refresh_auth(self):
-        data = parse_form_parameters(self.param)
+        data = parse_application_parameters(self.param)
         headers = {"Content-Type": "application/x-www-form-urlencoded", "User-Agent" : application_user_agent}
         req = request.Request(self.access_point, data=data, headers=headers)
         ref = log_entry ("Sending OAuth2 request to %s...." % self.context_short_str)
-        raw_resp = _urlopen(req)
+        raw_resp = raw_response(req)
         response = interpret_response(raw_resp)
         
         self.access_token  = response["access_token"]
@@ -78,26 +54,13 @@ class Authentication():
         self.user_agent = {"User-Agent" : application_user_agent}
         self.default_headers = dict(self.bearer, **self.user_agent)
         
-    def get(self, resource, query_param = {}, headers={}, HEAD=False):
-        url = full_resource_url(*resource, mode=self.__mode_str())
         
-        # This ugly block allows handling query parameters coming
-        # from both the resource url and the query_param argument
-        url_parts = (url+"?").split('?')
-        url = url_parts[0]
-        qp1 = url_parts[1]
-        qp2 = parse.urlencode(query_param)
-        if not qp1:
-            qp = qp2
-        elif not qp2:
-            qp = qp1
-        else:
-            qp = qp1+"&"+qp2
-        if qp:
-            url += "?" + qp
+    def get(self, resource, query_param = {}, headers={}, HEAD=False):
+        url = full_resource_url(*resource, mode=self.__mode_str())            
+        url = parseappend_query_parameters(url, query_param)
         
         req = request.Request(url, headers = dict(headers, **self.default_headers))
-        raw_resp = _urlopen(req)
+        raw_resp = raw_response(req)
         response = interpret_response(raw_resp)
         
         if HEAD:
@@ -111,7 +74,7 @@ class Authentication():
         
         req = request.Request(url, headers = dict(headers, **self.user_agent))
         req.get_method = lambda : 'HEAD'
-        raw_resp = _urlopen(req)
+        raw_resp = raw_response(req)
         return raw_resp.info()
         
         
@@ -120,21 +83,10 @@ class Authentication():
         
         req = request.Request(url, headers = dict(headers, **self.user_agent))
         req.get_method = lambda : 'OPTIONS'
-        raw_resp = _urlopen(req)
+        raw_resp = raw_response(req)
         response = interpret_response(raw_resp)
         return response
         
-    def __ppd_request(self, resource, app_param, headers={}, method='', content_type = "application/json"): # POST/PUT/DELETE
-        url = full_resource_url(*resource, mode=self.__mode_str())
-        headers = dict({"Content-Type": content_type},**dict(headers, **self.default_headers))
-        data = parse_form_parameters(app_param, content_type=headers["Content-Type"], method=method)
-        
-        req = request.Request(url, data=data, headers=headers)
-        if method:
-            req.get_method = lambda : method
-        raw_resp = _urlopen(req)
-        response = interpret_response(raw_resp)
-        return response
         
     def post(self, resource, app_param, headers={}, content_type = "application/json"):
         return self.__ppd_request(resource, app_param, headers={}, content_type = content_type)
@@ -145,11 +97,26 @@ class Authentication():
     def delete(self, resource, app_param={}, headers={}, content_type = "application/json"):
         return self.__ppd_request(resource, app_param, headers={}, method='DELETE', content_type = content_type)
         
+        
+    def __ppd_request(self, resource, app_param, headers={}, method='', content_type = "application/json"): # POST/PUT/DELETE
+        url = full_resource_url(*resource, mode=self.__mode_str())
+        headers = dict({"Content-Type": content_type},**dict(headers, **self.default_headers))
+        data = parse_application_parameters(app_param, content_type=headers["Content-Type"], method=method)
+        
+        req = request.Request(url, data=data, headers=headers)
+        if method:
+            req.get_method = lambda : method
+        raw_resp = raw_response(req)
+        response = interpret_response(raw_resp)
+        return response
+        
+        
     def __mode_str(self):
         if self.is_tester:
             return "test"
         else:
             return "main"
+    
     
     def get_server_id(self):
         return self.context_short_str

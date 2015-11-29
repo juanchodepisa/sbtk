@@ -50,6 +50,7 @@ try:
     """Fortunately, we can get along just fine. I'll obfuscate the keys for you.
     It's a simple and very breakable XOR encryption, but since you'll only be storing your own, \
     and your custom chosen password you won't need to write down anywhere, this is as good as it gets.
+    (Also Leira is telling me he hopes to come up with a better system later on)
 
     """,
     end ="")
@@ -231,7 +232,8 @@ hjw  `--.._________..--'
     ## Asking for password
     def ask_for_password():
         global my_password
-        while not FOO.flow_control_is(True):
+        FOO.change_flow(True)
+        while FOO.flow_control_is(True):
             my_password = FOO.question("""
             Now please enter your custom password.
             Create a new one if you don't have one already.
@@ -254,7 +256,7 @@ hjw  `--.._________..--'
                 else:
                     FOO.text("<blank password>", end = "", skip = True)
             FOO.yn_question("""
-            Are you sure you don't want to change your password?""")
+            Do you want to change your password?""")
     FOO.ANNOYANCE = False
     ask_for_password()
 
@@ -500,23 +502,22 @@ hjw  `--.._________..--'
             connection, but it might also be some other problem.
             """.format(error = e))
             FOO.yn_question("Do you want to try again?")
-            
-    try:
-        FOO.text("""
-        Now let me show you the tree of those resources I talked about before:
-        """)
-        FOO.safe_print(str(resources))
-        FOO.text("","""\
-        Yeah, I know! It's quite large.
-        """,end="")
-    except Exception:
-        FOO.text("""
-        Alas! Some unknown error occured. Nevermind, let's just continue...
-        """)
-        
-        
-        
+    
+
     if FOO.flow_continue():
+        try:
+            FOO.text("""
+            Now let me show you the tree of those resources I talked about before:
+            """)
+            FOO.safe_print(str(resources))
+            FOO.text("","""\
+            Yeah, I know! It's quite large.
+            """,end="")
+        except Exception:
+            FOO.text("""
+            Alas! Some unknown error occured. Nevermind, let's just continue...
+            """)        
+    
         FOO.yn_question("Do you want to see the examples?")
         
     FOO.ANNOYANCE = 0
@@ -574,18 +575,18 @@ hjw  `--.._________..--'
                 Now on to a more complicated example. \
                 GET requests may take query parameters to retrieve a more specific resource:
                 
-                >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating'}})
+                >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating', 'numProvisional':0}})
                 
                 This will show you a list of the strongest players registered for your country.
                 """.format(country = my_country),end = "")
                 FOO.ANNOYANCE+=1
             elif FOO.ANNOYANCE == 3:
                 FOO.text("""
-                >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating'}})\
+                >> id_card.get(['players'], query_param ={{'country':{country}, 'ordering':'-rating', 'numProvisional':0}})\
                 """.format(country = my_country))
             
             if FOO.ANNOYANCE == 3:
-                result = id_card.get(['players'], {'country': my_country, 'ordering': '-rating'})
+                result = id_card.get(['players'], {'country': my_country, 'ordering': '-rating', 'numProvisional': 0})
                 
                 FOO.builtin(result)
                 
@@ -628,8 +629,8 @@ hjw  `--.._________..--'
                 FOO.text("""
                 Done! Please check your OGS mail.""",
                 """
-                So, I hope this helped explain a bit how the whole system works."""
-                """I'll have more examples for you in the future.""", end = "")
+                So, I hope this helped explain a bit how the whole system works. \
+                I'll have more examples for you in the future.""", end = "")
         
         except HTTPError as e:
             FOO.text("""
@@ -663,12 +664,13 @@ hjw  `--.._________..--'
     """\
     Even more awesome: you can pass strings as arguments from the Terminal, sit back, and watch it \
     as the input autocompletes :O
-    """,
-    """\
-    Hint: 
+    """)
+    print("""\
+Hint: 
     
-    python {file} SKIP {username} Y SKIP N SKIP yourpassword SKIP Y SKIP
-    """.format(file = FOO.FILENAME, username = username))
+python {file} SKIP {username} Y SKIP N SKIP yourpassword SKIP N SKIP
+""".format(file = FOO.FILENAME, username = username))
+    FOO.text("", end ="")
     
     if not FOO.ANNOYANCE2:
         FOO.text("""\
@@ -683,8 +685,7 @@ hjw  `--.._________..--'
     I'll now fade into the oblivion of sys.exit().
 
     I wish you a nice day :)
-    """,
-    skip = True)
+    """)
 
 except KeyboardInterrupt:
     FOO.separator()
@@ -703,7 +704,7 @@ except KeyboardInterrupt:
 ##                                                   ##
 #######################################################
     """, skip = True)
-    FOO.text("\n\n So you're leaving already?\n Well have a nice day :)\n", skip = True)
+    FOO.text("\n\n So you're leaving already?\n Well have a nice day :)\n")
     
     
 
@@ -730,4 +731,4 @@ except Exception as e:
     FOO.text("""
 
     Have a nice day :S
-    """, skip = True)
+    """)

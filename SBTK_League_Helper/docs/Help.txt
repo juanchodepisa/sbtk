@@ -1,9 +1,4 @@
-1. The keys:
-First and foremost, you need an OGS account (https://online-go.com). Once there visit your settings, and you'll see an option to create "Application Specific Passwords".
-Unfortunately that is not all: you will have to need responsibility for your own copy of the program by providing your own developer keys as well (which you can find at https://online-go.com/developer). Generate an API client, you'll need both codes that you'll be given there.
+As of 24/11/2015 I have created a TUTORIAL.py in the main folder
 
-2. How to use:
-Not much to say here for now. Try to following menu options to see where they go. This is a text-only interface, and you'll need to enter menu options manually (only the character shown in parenthesis).
-You can also use keyboard interrupt (Control+C) to go to the Main Menu or cancel an operation.
-
-More helps topics to be added later...
+It is an executable code, and explains how to use the main tools
+to connect to the server and make requests.

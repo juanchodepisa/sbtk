@@ -18,15 +18,6 @@ def reset_index():
         json.dump({}, f)
         log_entry (user_index, "file reset to empty value.")
 
-if not os.path.isfile(user_index):
-    log_entry (user_index, "file does not exist.")
-    __ref = log_entry ("Creating file %s...." % user_index)
-    reset_index()
-    log_entry(__ref, "File created. Ready!")
-    del __ref
-else:
-    log_entry (user_index, "file exists. Ready!")
-
 
 def get_keys_directory(user, on_fail = no_directory_default):
     with open(user_index, 'r+') as f:
@@ -131,3 +122,21 @@ def retrieve_keys (user, password="", context=default_context, return_location=F
 def standard_filename(user, password, directory, context):
     filename = context+(obfuscated if password else plaintext)+quote(user, safe='')+".json"
     return os.path.join(directory, filename)
+    
+    
+    
+    
+###########################
+##                       ##
+##  INITIALIZATION CODE  ##
+##                       ##
+###########################
+
+if not os.path.isfile(user_index):
+    log_entry (user_index, "file does not exist.")
+    __ref = log_entry ("Creating file %s...." % user_index)
+    reset_index()
+    log_entry(__ref, "File created. Ready!")
+    del __ref
+else:
+    log_entry (user_index, "file exists. Ready!")

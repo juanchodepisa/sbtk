@@ -1,3 +1,5 @@
+from .key_handling import store_keys, retrieve_keys
+
 valid_charset = '-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
 def check_valid_password(pwd):

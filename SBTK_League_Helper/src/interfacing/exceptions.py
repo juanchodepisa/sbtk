@@ -9,7 +9,17 @@ class ParameterTypeError (Exception):
         return repr(self.description)
         
 
-class TypeUnsupportedError (Exception):    
+        
+#####################
+## FILE TYPE ERRORS
+## (from file, web-resource, etc.)
+#####################        
+        
+        
+class TypeUnsupportedError (Exception):
+    def __init__(self, description):
+        self.description = description
+
     def __str__(self):
         return repr(self.description)
 
@@ -37,3 +47,19 @@ class TypeUnparseError(TypeUnsupportedError):
     def __init__(self, content_type):
         self.value = content_type
         self.description = "Content type %s is not yet supported for unparsing from web content." % content_type
+        
+        
+        
+        
+#####################
+## CONTENT ERRORS
+## (from file, web-resource, etc.)
+#####################     
+
+class DataCorruptedError(Exception):
+    def __init__(self, obj, description="", **kwargs):
+        self.value= obj
+        self.description = ("Some of the data in %s seems to have be corrupted. "%obj) + description.format(kwargs)
+    
+    def __str__(self):
+        return self.description

@@ -120,19 +120,23 @@ else:
     def yn_question (string, flow = True):
         global FLOW_CONTROL_VALUE
         lines = string.splitlines()
-        for line in lines[:-1]:
-            print (pagebreaks(line))
-        try:
-            print (pagebreaks(lines[-1] + " (Y/N) "), end = "")
-        except IndexError:
-            print("(Y/N) ", end = "")
         
-        result = input_()
-        result = result.lower()
-        if result in ['y','yes','yeah','aye','ok','sure','affirmative','positive','of course','ye','yup','yep','true']:
-            result = True
-        else:
-            result = False
+        result = None
+        
+        while result is None:
+            for line in lines[:-1]:
+                print (pagebreaks(line))
+            try:
+                print (pagebreaks(lines[-1] + " (Y/N) "), end = "")
+            except IndexError:
+                print("(Y/N) ", end = "")
+            
+            inpt = input_()
+            inpt = inpt.lower()
+            if inpt in ['y','yes','yeah','aye','ok','sure','affirmative','positive','of course','ye','yup','yep','true']:
+                result = True
+            elif inpt in ['n','no','nah','nay','not','never','negative','of course not','ne','na','nope','nop','false']:
+                result = False
         
         if flow:
             FLOW_CONTROL_VALUE = result

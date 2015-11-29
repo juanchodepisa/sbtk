@@ -1,26 +1,23 @@
-﻿# import user_interfaces.console_ui.mock_widgets.display_elements
+﻿from src.tools.markers import AdHocMarker
 
-# def deco (f):
-    # def inner():
-        # with context() as c:
-            # f()
-    # return inner
+class Foo:
+    def __new__(Class):
+        print ("Foo new")
+        super().__new__(Class)
 
-# class context():
-    # def __enter__(self):
-        # print ("entering")
-        # return self
-    
-    # def foo (self):
-        # print("bar")
-    
-    # def __exit__(self, exc_type, exc_value, traceback):
-        # print ("exito")
+    def __init__(self):
+        print ("Foo init")
+        super().__init__()
+
+class Bar:
+    def __new__(Class):
+        print ("Bar new")
+        super().__new__(Class)
+
+    def __init__(self):
+        print ("Bar init")
+        super().__init__()
         
-
-# @deco
-# def f():
-    # c.foo()
+class someshit(Foo, Bar):
+    pass
     
-import logging
-logging.warning('{} before you {}', 'Look', 'leap!')

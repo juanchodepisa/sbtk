@@ -147,6 +147,8 @@ resources.add(['user'],
     title = "User Profile",
     description = "User personal information and stats.",
     methods = [GET])
+    #synonyms
+resources.add_shortcut(['me'],['user'])
     
 resources.add(['user', 'settings'],
     default = '{{api_server}}/{{api_version}}/me/settings/',
@@ -334,6 +336,15 @@ resources.add(['players', ID, 'tournaments'],
     title = "Player Tournaments",
     description = "View the list of tournaments a player has participated in.",
     methods = [GET])
+    
+    # ICON
+    
+resources.add(['players', ID, 'icon'],
+    default = '{{api_server}}/{{api_version}}/players/{0}/icon/',
+    title = "Player Icon",
+    description = "View the player icon.",
+    dev_info = "possibly png format, not yet supported"
+    methods = [GET])
 
 """
 OPEN CHALLENGES
@@ -461,11 +472,6 @@ DEMOS
 """
     
     # LIST & DETAILS
-    
-resources.add_shortcut(['demos'], ['reviews'])
-# Demos have their own directories, but they seem to serve no separate purpose from reviews.
-"""
-HERE BE THE CODE, IN CASE IT IS NEEDED LATER
 
 resources.add(['demos'],
     default = '{{api_server}}/{{api_version}}/demos/',
@@ -478,7 +484,7 @@ resources.add(['demos', ID],
     title = "Demo Details",
     description = "Information and details of a review.",
     methods = [GET])
-   """
+
    
    
 """
@@ -573,7 +579,7 @@ resources.add_shortcut(['tournaments', ID, 'players'], ['tournaments', ID, 'part
     # MANUAL START
     
 resources.add(['tournaments', ID, 'start'],
-    default = '{{api_server}}/{{api_version}}/tournaments/{0}/',
+    default = '{{api_server}}/{{api_version}}/tournaments/{0}/start',
     title = "Start Tournament",
     description = "Start a tournament manually.",
     methods = [POST])

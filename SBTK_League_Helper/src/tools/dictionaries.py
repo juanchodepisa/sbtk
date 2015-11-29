@@ -1,8 +1,14 @@
 from .markers import AdHocMarker
 from .exceptions import InitializationError, ReservedValueError
+from collections import OrderedDict
 
+######################
+##                  ##
+##  CUSTOM CLASSES  ##
+##                  ##
+######################
 
-class MarkedDict(dict): # This class and its subclasses always require initialization before use.
+class MarkedDict(OrderedDict): # This class and its subclasses always require initialization before use.
     __initialized = None #Indicates the closest initialized superclass (of MarkedDict type) 
     
     # By (my own) convention:
@@ -321,3 +327,45 @@ class MarkedDict(dict): # This class and its subclasses always require initializ
         
         Class.__all_markers = tuple(Class.__ref_markers_index.values()) + tuple(Class.__markers_index.values())
             
+            
+         
+##################
+
+from collections import UserDict
+
+class PostLoadedDict(UserDict):
+    def __init__(self, loader):
+        self.__loader = loader
+        self.__loaded = False
+        super().__init__()
+        
+    def __missing__(self, key):
+        if self.__loaded:
+            raise KeyError(key)
+        else:
+            d = self.__loader()
+            del self.__loader
+            data = self.data
+            try:
+                data.update(((k,v) for k,v in d.items() if k not in data))
+            except AttributeError:
+                data.update(((k,v) for k,v in d if k not in data))
+            self.__loaded = True
+            return data[key]
+            
+            
+            
+            
+##############################################################################################################
+
+        
+#################
+##             ##
+##  FUNCTIONS  ##
+##             ##
+#################
+
+
+def subdict(d1, d2):
+    superset = d2.items()
+    return all(item in superset for item in d1.items())

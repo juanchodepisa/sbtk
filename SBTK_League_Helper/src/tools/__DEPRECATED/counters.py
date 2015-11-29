@@ -1,3 +1,6 @@
+# DEPRECATION:
+# Substituted by the standard library Counter class
+
 class MultiCounter(dict):
     def __init__(self, *args, default=0, increment=1):
         self.__default=0
