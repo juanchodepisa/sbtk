@@ -51,7 +51,7 @@ def get_keys_directory(user, on_fail = no_directory_default):
                 if update:
                     ref = log_entry ("Updating %s...." % user_index)
                     f.seek(0)
-                    json.dump(index_data, f)
+                    json.dump(index_data, f, sort_keys=True, indent=4)
                     f.truncate()
                     log_entry (ref, "Updated!")
     
@@ -64,7 +64,7 @@ def set_keys_directory(user, directory):
         index_data = json.load(f)
         index_data[user] = directory
         f.seek(0)
-        json.dump(index_data, f)
+        json.dump(index_data, f, sort_keys=True, indent=4)
         f.truncate()
         log_entry (ref, "Updated!")
 
@@ -75,7 +75,7 @@ def remove_keys_directory(user):
         index_data = json.load(f)
         index_data.pop(user)
         f.seek(0)
-        json.dump(index_data, f)
+        json.dump(index_data, f, sort_keys=True, indent=4)
         f.truncate()
         log_entry (ref, "Removed!")
 
@@ -92,7 +92,7 @@ def store_keys (user, keys, password="", context=default_context, if_no_director
     filename = standard_filename(user, password, directory, context)
     with open(filename, 'w') as f:
         ref = log_entry("Storing %s's keys at %s...." % (user, filename))
-        json.dump(keys, f)
+        json.dump(keys, f, sort_keys=True, indent=4)
         log_entry(ref, "Stored!")
 
 

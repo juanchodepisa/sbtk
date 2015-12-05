@@ -1,10 +1,10 @@
 from .misc import id_function
 from .dictionaries import subdict
-import json
 
 # MAIN OBJECT
 
 class Serializer(object):
+# pseudo abstract class
 
     def __init__(self, object_type, parser, unparser):
         # parser and unparser must do the transformations between
@@ -17,29 +17,39 @@ class Serializer(object):
     def object_type(self):
         return self.__type
         
+    @property
+    def loader(self):
+        raise NotImplementedError("{s.__class__} does not implement the property 'loader'. Create a subclass instead.".format(s=self))
+        
+    @property
+    def dumper(self):
+        raise NotImplementedError("{s.__class__} does not implement the property 'dumper'. Create a subclass instead.".format(s=self))
+        
     def parse(self, obj):
         # Unpythonic and ugly. Get over it
         if isinstance(obj, self.__type):
             builtin_obj = self.__parser(obj)
-            result_dict ={'class'   : self.__type.__name__,
-                          'module'  : self.__type.__module__,
-                          'content' : builtin_obj}
+            result_dict ={
+                '__class__'   : self.__type.__name__,
+                '__module__'  : self.__type.__module__,
+                '__comments__': "SBTK custom Python object",
+                '__object__' : builtin_obj}
             try:
-                result_dict['metadata'] = obj.metadata
+                result_dict['__metadata__'] = obj.__metadata__
             except AttributeError as e:
-                if hasattr(obj, 'metadata'):
+                if hasattr(obj, '__metadata__'):
                     raise e from None
-            return json.dumps(result_dict)
+            return self.dumper(result_dict)
         else:
             raise SerializationError(type(obj), self.__type)
         
     def unparse(self, serial_str, check_keys = {}):
         # Unpythonic and ugly. Get over it
-        dic = json.loads(serial_str)
+        dic = self.loader(serial_str)
         tp = self.__type
-        if dic['class'] == tp.__name__ and dic['module'] == tp.__module__:
+        if dic['__class__'] == tp.__name__ and dic['__module__'] == tp.__module__:
             try:
-                metadata = dic['metadata']
+                metadata = dic['__metadata__']
                 with_metadata = True
             except KeyError:
                 metadata = {}
@@ -48,18 +58,23 @@ class Serializer(object):
             if not subdict(check_keys, metadata):
                 raise SerializationKeyError(metadata, check_keys)            
             elif with_metadata:
-                return self.__unparser(dic['content'], metadata = metadata)
+                return self.__unparser(dic['__object__'], metadata = metadata)
             else:
-                return self.__unparser(dic['content'])
+                return self.__unparser(dic['__object__'])
         else:
             raise SerializationError(tp.__module__+"."+tp.__name__, self.__type, parse = False)
     
 
 ###########################################################################
 
-
-
-
+class JSONSerializer (Serializer):
+    from json import loads as loader, dumps as dumper
+    from functools import partial as __partial
+    
+    loader = staticmethod(loader)
+    dumper = staticmethod(__partial(dumper, sort_keys=True, indent=4))
+    
+    
 
 
 

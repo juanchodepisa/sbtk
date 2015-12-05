@@ -3,7 +3,7 @@ from urllib import request
 from src import log_entry, application_user_agent
 from src.security import retrieve_keys
 
-from .resources import full_resource_url, get_context_str
+from .resources import full_resource_url, get_context_str, main_server, beta_server
 
 from ..exceptions import ParameterTypeError
 from ..http import raw_response
@@ -11,12 +11,13 @@ from ..parsers import parse_application_parameters, parseappend_query_parameters
 
 
 
-encoding='utf-8'
+encoding='utf-8' # data encoding from the server
 
 
 class Authentication():
     def __init__(self, user, password, testing = False):
         self.is_tester = testing
+        self.server = beta_server if testing else main_server
         self.context_str = get_context_str("context", mode=self.__mode_str())
         self.context_short_str = get_context_str("context_short", mode=self.__mode_str())
         self.access_point = full_resource_url('access token', mode=self.__mode_str())

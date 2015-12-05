@@ -1,28 +1,26 @@
-from src.tools.dictionaries import PostLoadedDict
+from .servers import Server
+
+# List of supported servers
+# for external use the dict variable 'SUPPORTED_SERVERS' is provided instead
+
+# to add a new server, simply add a short name for it into the __supported list
+# and then update the get_loader()
+# (also, don't forget to actually implement the server features ;) )
+
+__supported = ['OGS', 'OGS_Beta']
+
+def get_loader(name):
+    if name == 'OGS':
+        import .ogs.loaders
+        return loaders.main_loader
+    elif name == 'OGS_Beta':
+        import .ogs.loaders
+        return loaders.beta_loader
+        
+#############
 
 
-class Server():
-    def __init__(self, loader):
-        # Not preloaded
-        # loaders must produce dictionaries (or an appropriate iterable)
-        # with the required keys.
-        # The reason for this is that code for certain servers need not be loaded
-        # if it's not going to be used at all
-        self.__data = PostLoadedDict(loader)
-        
-    @property
-    def name(self):
-        return self.__data['name']
-        
-    @property
-    def shortname(self):
-        return self.__data['shortname']
-        
-    @property
-    def beta(self):
-        return self.__data['tester']
+SUPPORTED_SERVERS = {}
 
-## THIS IS DEPRECATED, IT MUST BE IMPLEMENTED IN A MORE SPECIFIC WAY:
-# supported_servers = {
-    # "OGS": AdHocMarker("OGS", "Go Server"),
-    # "OGS_Beta": AdHocMarker("OGS_Beta", "Beta Go Server")}
+for name in __supported:
+    SUPPORTED_SERVERS[name] = Server(name, get_loader(name))
