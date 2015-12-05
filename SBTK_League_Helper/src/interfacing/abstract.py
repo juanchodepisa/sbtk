@@ -162,6 +162,7 @@ class ServerElement(UserDict):
         raise NotImplementedError("{c} does not implement the classmethod 'request_kwarguments'. Create a subclass instead or override the method.".format(c=Class))
     
     @classmethod
+    def unpack (Class, package, request_type, **kwargs) -> "builtin":
         raise NotImplementedError("{c} does not implement the classmethod 'unpack'. Create a subclass instead or override the method.".format(c=Class))
 
     
