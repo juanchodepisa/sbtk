@@ -1,3 +1,5 @@
+from src import log_entry
+
 from .servers import Server
 
 # List of supported servers
@@ -7,15 +9,26 @@ from .servers import Server
 # and then update the get_loader()
 # (also, don't forget to actually implement the server features ;) )
 
-__supported = ['OGS', 'OGS_Beta']
+__supported = ['OGS', 'OGS_Beta'] #short strings
 
-def get_loader(name):
+def __get_loader(name):
+    loader = None
     if name == 'OGS':
-        import .ogs.loaders
-        return loaders.main_loader
+        from .ogs.loaders import main_loader
+        loader = main_loader
     elif name == 'OGS_Beta':
-        import .ogs.loaders
-        return loaders.beta_loader
+        from .ogs.loaders import beta_loader
+        loader = beta_loader
+    return __log_wrapper(name, loader)
+        
+        
+def __log_wrapper(name, loader):
+    def wrapper():
+        ref = log_entry("Loading {} client tools...".format(name))
+        result = loader()
+        log_entry(ref, "Loaded!!!")
+        return result
+    return wrapper
         
 #############
 
@@ -23,4 +36,6 @@ def get_loader(name):
 SUPPORTED_SERVERS = {}
 
 for name in __supported:
-    SUPPORTED_SERVERS[name] = Server(name, get_loader(name))
+    SUPPORTED_SERVERS[name] = Server(name, __get_loader(name))
+    
+del __supported, __get_loader, __log_wrapper, log_entry, Server

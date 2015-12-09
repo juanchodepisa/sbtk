@@ -31,13 +31,11 @@ GET, PUT, POST, PATCH, DELETE = 'GET', 'PUT', 'POST', 'PATCH', 'DELETE'
 def get_context_str(s, mode = "main"):
     return server_context_strings[mode][s]
 
-    
 
 main_server = SUPPORTED_SERVERS[get_context_str('context_short')]
 beta_server = SUPPORTED_SERVERS[get_context_str('context_short', 'test')]
-    
-    
-    
+
+
 
 
 __ref1 = log_entry ("Setting up %s resource tree...." % get_context_str("host_website"))

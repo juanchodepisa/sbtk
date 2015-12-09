@@ -8,6 +8,21 @@ class ParameterTypeError (Exception):
     def __str__(self):
         return repr(self.description)
         
+class AuthenticationError(Exception):
+    pass
+    
+class BadCredentialsError(AuthenticationError):
+    pass
+    
+class WrongServerCredentials(BadCredentialsError):
+    def __init__(self, credentials_server, caller_class):
+        self.value = credentials_server
+        self.caller_object = caller_class
+        self.description = "Class {c.__name__} requires credentials for server {c.server}. Given server: {s}".format(s = credentials_server, c = caller_class)
+        
+    def __str__(self):
+        return repr(self.description)
+    
 
         
 #####################

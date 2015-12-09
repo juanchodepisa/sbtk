@@ -2,7 +2,7 @@ from src.tools.dictionaries import PostLoadedDict
 
 # Utility class
 ################################################
-class __ServerImplementationDict(PostLoadedDict):
+class ServerImplementationDict(PostLoadedDict):
     def __missing__(self, key):
         try:
             return super().__missing__(key)
@@ -20,7 +20,8 @@ class Server():
         # The reason for this is that code for certain servers need not be loaded
         # if it's not going to be used at all
         # It also prevents import loop collisions.
-        self.__data = __ServerImplementationDict(loader)
+        global __ServerImplementationDict
+        self.__data = ServerImplementationDict(loader)
         self.__shortname = shortname
     
     @property
@@ -28,6 +29,8 @@ class Server():
     # This is the only property provided from above
         return self.__shortname
         
+    def __str__(self):
+        return str(self.__shortname)
         
     # All other properties must come from canonical sources
     # provided by the server loader
@@ -52,10 +55,10 @@ class Server():
     # 1- Credentials:
     
     @property
-    def Passport(self): # I really don't know how to call this.
+    def Auth(self): # I really don't know how to call this.
         return self.__data['cls_auth']
     @property
-    def passport_fields(self):
+    def auth_fields(self):
         return self.__data['list_authkeys']
         
     # 2- Server Elements:

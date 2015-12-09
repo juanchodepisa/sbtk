@@ -1,9 +1,10 @@
+from abc import ABCMeta, abstractmethod
 from .misc import id_function
 from .dictionaries import subdict
 
 # MAIN OBJECT
 
-class Serializer(object):
+class Serializer(object, metaclass = ABCMeta):
 # pseudo abstract class
 
     def __init__(self, object_type, parser, unparser):
@@ -18,12 +19,14 @@ class Serializer(object):
         return self.__type
         
     @property
+    @abstractmethod
     def loader(self):
-        raise NotImplementedError("{s.__class__} does not implement the property 'loader'. Create a subclass instead.".format(s=self))
+        ...
         
     @property
+    @abstractmethod
     def dumper(self):
-        raise NotImplementedError("{s.__class__} does not implement the property 'dumper'. Create a subclass instead.".format(s=self))
+        ...
         
     def parse(self, obj):
         # Unpythonic and ugly. Get over it
@@ -35,7 +38,7 @@ class Serializer(object):
                 '__comments__': "SBTK custom Python object",
                 '__object__' : builtin_obj}
             try:
-                result_dict['__metadata__'] = obj.__metadata__
+                result_dict['__metadata__'] = obj.__formatted_metadata__
             except AttributeError as e:
                 if hasattr(obj, '__metadata__'):
                     raise e from None
